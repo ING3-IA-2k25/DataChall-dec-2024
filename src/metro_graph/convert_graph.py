@@ -15,8 +15,8 @@ def convert_graph_to_json():
                 "name": node,
                 "lines": data.get("lines", []),
                 "gps": {
-                    "lat": data.get("gps", 0).split(",")[0],
-                    "lon": data.get("gps", 0).split(",")[1]
+                    "latitude": data.get("gps", 0).split(",")[0],
+                    "longitude": data.get("gps", 0).split(",")[1]
                 } if data.get("gps", False) else None
             }
             for node, data in G.nodes(data=True)
