@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Dict, Set, Tuple
+from typing import List, Dict, Set, Tuple, Optional
 import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -10,11 +10,31 @@ from pathlib import Path
 from GraphPersistence import GraphPersistence
 
 @dataclass
+class GpsCoordinate:
+    """Represents a GPS coordinate with latitude and longitude"""
+    latitude: float
+    longitude: float
+
+    @classmethod
+    def from_string(cls, gps_string: str) -> Optional['GpsCoordinate']:
+        """Creates a GpsCoordinate from a string format 'latitude, longitude'"""
+        if not gps_string or gps_string.strip() == "":
+            return None
+        try:
+            lat_str, lon_str = gps_string.split(',')
+            return cls(
+                latitude=float(lat_str.strip()),
+                longitude=float(lon_str.strip())
+            )
+        except (ValueError, AttributeError):
+            return None
+
+@dataclass
 class Station:
     """Station entity with name, lines and GPS coordinates"""
     name: str
     lines: Set[str]
-    gps: str
+    gps: Optional[GpsCoordinate]
 
 @dataclass
 class Connection:
@@ -40,6 +60,7 @@ class StationRepository:
         self.stations: Dict[str, Station] = {}
         self._init_stations()
 
+    """Handles station data processing and storage"""
     def _init_stations(self):
         metro_plan = self.data_loader.load_metro_plan()
         positions = self.data_loader.load_station_positions()
@@ -57,11 +78,12 @@ class StationRepository:
         
         # Create Station objects
         for station_name, lines in station_lines.items():
-            gps = positions_dict.get(station_name, "")
+            gps_str = positions_dict.get(station_name, "")
+            gps_coord = GpsCoordinate.from_string(gps_str)
             self.stations[station_name] = Station(
                 name=station_name,
                 lines=lines,
-                gps=gps
+                gps=gps_coord
             )
 
     def get_all_stations(self) -> Dict[str, Station]:
@@ -95,6 +117,21 @@ class MetroGraph:
     def get_graph(self) -> nx.Graph:
         return self.graph
 
+
+def generate_metro_graph() -> nx.Graph:
+    """Returns a fully initialized metro graph with stations and connections"""
+    data_loader = DataLoader()
+    station_repository = StationRepository(data_loader)
+    metro_graph = MetroGraph(station_repository)
+    return metro_graph.get_graph()
+
+
+def load_metro_graph() -> nx.Graph:
+    """Loads the saved metro graph"""
+    persistence = GraphPersistence()
+    return persistence.load_graph()
+
+
 def main():
     # Initialize components
     data_loader = DataLoader()
@@ -109,7 +146,7 @@ def main():
     print(f"Number of connections: {G.number_of_edges()}")
     
     # Example: print first station's details
-    first_station = list(G.nodes(data=True))[0]
+    first_station = list(G.nodes(data=True))[-1]
     print(f"\nExample station: {first_station}")
     
     # draw the graph
