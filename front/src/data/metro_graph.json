@@ -2785,17 +2785,6 @@
             }
         },
         {
-            "name": "Mairie d'Issy",
-            "lines": [
-                "12",
-                "13"
-            ],
-            "gps": {
-                "latitude": "48.82430937109403",
-                "longitude": " 2.2736655574997546"
-            }
-        },
-        {
             "name": "Les Agnettes",
             "lines": [
                 "13"

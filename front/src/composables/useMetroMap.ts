@@ -6,6 +6,8 @@ import MapService from '@/services/MapService';
 import StationMarkerService from '@/services/StationMarkerService';
 import ConnectionLineService from '@/services/ConnectionLineService';
 
+let onlyOne = true;
+
 export function useMetroMap() {
   const mapInstance = ref<L.Map | null>(null);
   const store = useMetrographStore();
@@ -14,9 +16,25 @@ export function useMetroMap() {
   const stationService = new StationMarkerService();
   const connectionService = new ConnectionLineService();
 
+
   const initMap = (elementId: string) => {
     const parisCenter = new L.LatLng(48.8566, 2.3522);
     mapInstance.value = mapService.initializeMap(elementId, parisCenter, 13);
+
+    if (onlyOne) {
+      onlyOne = false;
+
+      setInterval( async () => {
+        const oldGraph = store.graph;
+        await store.loadGraph();
+        if (oldGraph?.nodes.length !== store.graph?.nodes.length || oldGraph?.edges.length !== store.graph?.edges.length) {
+          updateMap();
+        }
+      } , 1000
+      );
+
+    }
+
     updateMap();
   };
 
@@ -36,9 +54,9 @@ export function useMetroMap() {
 
     console.log(validStations.length, 'valid stations');
 
-    stationService.addStationMarkers(mapInstance.value, validStations);
+    stationService.addStationMarkers(mapInstance.value as L.Map, validStations);
     connectionService.addConnectionLines(
-      mapInstance.value,
+      mapInstance.value as L.Map,
       store.graph.edges,
       validStations
     );

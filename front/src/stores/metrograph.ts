@@ -1,7 +1,7 @@
 // stores/metrograph.ts
 import { defineStore } from 'pinia';
 import type { MetroGraph } from '@/types/metro.types';
-import { type IMetroGraphService, MetroGraphService } from '@/services/MetroGraphService';
+import { MetroGraphService } from '@/services/MetroGraphService';
 
 interface MetroState {
   graph: MetroGraph | null;
@@ -23,6 +23,8 @@ export const useMetrographStore = defineStore('metrograph', {
       this.error = null;
 
       try {
+        // const response = await fetch('http://localhost:3000/metro_graph.json');
+        // this.graph = await response.json() as MetroGraph;
         this.graph = await service.loadGraph();
       } catch (error) {
         this.error = error instanceof Error ? error.message : 'Unknown error';

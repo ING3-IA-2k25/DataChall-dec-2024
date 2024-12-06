@@ -1,5 +1,5 @@
 // types/map.types.ts
-import type { LatLng, Map, Marker, Polyline } from 'leaflet';
+import type { LatLng, Map, Circle , Polyline } from 'leaflet';
 import type { Station, Connection } from '@/types/metro.types';
 
 export interface IMapService {
@@ -7,7 +7,7 @@ export interface IMapService {
 }
 
 export interface IStationMarkerService {
-  addStationMarkers(map: Map, stations: Station[]): Marker[];
+  addStationMarkers(map: Map, stations: Station[]): Circle[];
   removeStationMarkers(): void;
 }
 

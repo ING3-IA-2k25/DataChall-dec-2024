@@ -1,6 +1,5 @@
 // services/MetroGraphService.ts
 import type { MetroGraph } from '@/types/metro.types';
-import graphData from '@/data/metro_graph.json';
 
 export interface IMetroGraphService {
   loadGraph(): Promise<MetroGraph>;
@@ -8,6 +7,6 @@ export interface IMetroGraphService {
 
 export class MetroGraphService implements IMetroGraphService {
   async loadGraph(): Promise<MetroGraph> {
-    return Promise.resolve(graphData as MetroGraph);
+    return fetch('http://localhost:3000/metro_graph.json').then(response =>  response.json() as Promise<MetroGraph>);
   }
 }

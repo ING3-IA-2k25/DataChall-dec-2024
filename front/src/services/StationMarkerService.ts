@@ -28,9 +28,9 @@ export default class StationMarkerService implements IStationMarkerService {
         // Add hover effect
         circle.on('mouseover', () => {
           circle.setStyle({
-            fillOpacity: 1,
-            radius: 75
+            fillOpacity: 1
           });
+          circle.setRadius(75);
 
           // Show station info
           L.popup()
@@ -44,9 +44,9 @@ export default class StationMarkerService implements IStationMarkerService {
 
         circle.on('mouseout', () => {
           circle.setStyle({
-            fillOpacity: 0.7,
-            radius: 50
+            fillOpacity: 0.7
           });
+          circle.setRadius(50);
         });
 
         circle.addTo(map);
