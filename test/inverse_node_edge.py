@@ -1,4 +1,5 @@
 import networkx as nx
+import numpy as np
 def inverse_node_edge(mat_adj_input : list) -> list:
     graph = []
     for i in range(len(mat_adj_input)):
@@ -34,11 +35,9 @@ def inverse_node_edge_mat2mat(mat_adj_input : list) -> list:
             else:
                 mat_res[i].append(0)
 
-    return mat_res
+    return mat_res, edge_list
 
 
-
-        
 
 test = [[1, 1, 1, 1],
         [1, 1, 1, 0],
