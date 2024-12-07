@@ -15,7 +15,8 @@ def inverse_node_edge(mat_adj_input : list) -> list:
         for i in range(len(mat_adj_input[int(k2[1])])):
             if mat_adj_input[int(k2[1])][i]:
                 graph_inverted[k][f"{k2[1]},{i}"] = {"weight" : 1}
-    return graph_inverted
+            
+    return nx.from_dict_of_dicts(graph_inverted, create_using=nx.DiGraph)
 
 # test = [[1, 1, 1, 1],
 #         [1, 1, 1, 0],
@@ -37,18 +38,19 @@ def read_matrix_from_file(file_path):
             matrix.append(row_elements)
     return matrix
 
-test_mat = read_matrix_from_file("test/message.txt")
-test_mat.remove([])
+if __name__ == '__main__':
+    test_mat = read_matrix_from_file("test/message.txt")
+    test_mat.remove([])
 
-cpt = 0
-for i in test_mat:
-    for j in i:
-        cpt += j
+    cpt = 0
+    for i in test_mat:
+        for j in i:
+            cpt += j
 
-print(cpt)
+    print(cpt)
 
 
-print(len(inverse_node_edge(test_mat).keys()))
-newG = nx.from_dict_of_dicts(inverse_node_edge(test_mat), create_using=nx.DiGraph)
-print(newG)
+    print(len(inverse_node_edge(test_mat).keys()))
+    newG = nx.from_dict_of_dicts(inverse_node_edge(test_mat), create_using=nx.DiGraph)
+    print(newG)
 # print(newG.edges)

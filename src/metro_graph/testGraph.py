@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import networkx as nx
 from accebilite import create_data_set, graphs_to_array
+from inverse_node_edge import inverse_node_edge
 
 def test_dataset(dataset, G):
     """
@@ -9,16 +10,18 @@ def test_dataset(dataset, G):
     """
     # Conserver la liste ordonnée des nœuds
     nodelist = list(G.nodes())
-
+    matrice_init = nx.to_numpy_array(G, nodelist=nodelist, weight=None)
+    # Inverse_node_edge est censée convertir une matrice d'adjacence en graphe
+    G_init = inverse_node_edge(matrice_init)
+    G_init = nx.relabel_nodes(G_init, {i: nodelist[i] for i in range(len(nodelist))})
     for idx, matrice in enumerate(dataset):  # Comparer les 2 premiers graphes avec le graphe initial
         # Reconstruire le graphe à partir de la matrice avec le même ordre des nœuds
-        newG = nx.from_numpy_array(matrice, create_using=nx.DiGraph)
+        newG = inverse_node_edge(matrice)
         newG = nx.relabel_nodes(newG, {i: nodelist[i] for i in range(len(nodelist))})
 
         print(f"\nComparaison du graphe {idx + 1} avec le graphe initial:")
         
-        print(G)
-        compare_graphs(G, newG, title=f"Graphe Initial vs Modifié {idx + 1}")
+        compare_graphs(G_init, newG, title=f"Graphe Initial vs Modifié {idx + 1}")
 
 def compare_graphs(graph1, graph2, title="Comparaison des Graphes"):
     """

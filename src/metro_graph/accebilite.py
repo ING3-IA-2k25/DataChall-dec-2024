@@ -41,7 +41,6 @@ def create_data_set(graph, num_graphs, max_edges_to_remove=2):
             graph_copy.remove_edges_from(edges_to_remove)
             # Utiliser un ensemble pour éviter les doublons
             connected_graphs.add((frozenset(edges_to_remove), graph_copy))
-        print(len(connected_graphs))
     # Retourner la liste des graphes avec les arêtes supprimées
     
     return [graph for _, graph in connected_graphs]
