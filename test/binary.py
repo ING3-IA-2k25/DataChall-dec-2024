@@ -1,6 +1,7 @@
 from math import log2
 import sys
 import numpy as np
+import networkx as nx
 
 def compressMat(mat : list) -> list:
     tab = [[len(mat), len(mat[0])], [], []]
@@ -21,6 +22,14 @@ def decompressMat(mat : list) -> list:
                 res[i].append(mat[2][idx])
             else:
                 res[i].append(0)
+    return res
+
+def decompressMat2(mat : list) -> list:
+    res = [[0 for _ in range(mat[0][1])] for _ in range(mat[0][0])]
+    for i in range(len(mat[1])):
+        x = mat[1][i] // mat[0][1]
+        y = mat[1][i] % mat[0][1]
+        res[x][y] = mat[2][i]
     return res
 
 def binary_search(arr, target):
@@ -60,13 +69,23 @@ def egal(mat1, mat2):
 
 test_mat = read_matrix_from_file("test/message.txt")
 test_mat.remove([])
+
+test_mat = np.array(test_mat)
+
+for i in range(1000):
+    truc = nx.from_numpy_array(test_mat, create_using=nx.DiGraph)
+
+
 # test_mat = [[1, 1, 1, 1, 1],
 #             [0, 0, 0, 0, 0],
 #             [1, 1, 1, 0, 0],
 #             [0, 0, 0, 0, 1],
 #             [1, 0, 0, 0, 0]]
+# comp = compressMat(test_mat)
+# for i in range(1000):
+#     decomp = decompressMat2(comp)
+# # print(comp)
+# egal(test_mat, decomp)
 
-comp = compressMat(test_mat)
-decomp = decompressMat(comp)
-# print(comp)
-egal(test_mat, decomp)
+#decomp : 4s/1000
+#comp : 4s/1000
