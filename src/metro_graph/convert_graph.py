@@ -5,9 +5,11 @@ import sys
 
 from src.metro_graph.metroGraph import load_metro_graph, GpsCoordinate
 
-def convert_graph_to_json():
+def convert_graph_to_json(G: nx.Graph = None):
+    if G is None:
+        raise ValueError("G is None")
+    
     try:
-        G = load_metro_graph()
         
         graph_data = {
             "nodes": [
@@ -46,4 +48,4 @@ def convert_graph_to_json():
         
         
 if __name__ == "__main__":
-    convert_graph_to_json()
+    convert_graph_to_json(load_metro_graph())
