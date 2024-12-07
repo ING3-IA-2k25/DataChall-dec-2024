@@ -139,10 +139,10 @@ def load_metro_graph() -> nx.Graph:
     persistence = GraphPersistence()
     return persistence.load_graph()
 
-def save_metro_graph(G: nx.Graph) -> None:
+def save_metro_graph(G: nx.Graph, filename:str = "metro_graph") -> None:
     """Saves the metro graph to disk"""
     persistence = GraphPersistence()
-    persistence.save_graph(G)
+    persistence.save_graph(G, filename + ".pkl")
 
 def main():
     # Initialize components
