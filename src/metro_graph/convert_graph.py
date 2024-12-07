@@ -3,7 +3,7 @@ import json
 import networkx as nx
 import sys
 
-from metroGraph import load_metro_graph
+from src.metro_graph.metroGraph import load_metro_graph, GpsCoordinate
 
 def convert_graph_to_json():
     try:
@@ -15,18 +15,20 @@ def convert_graph_to_json():
                 "name": node,
                 "lines": data.get("lines", []),
                 "gps": {
-                    "latitude": data.get("gps", 0).split(",")[0],
-                    "longitude": data.get("gps", 0).split(",")[1]
-                } if data.get("gps", False) else None
+                    "latitude": data.get("gps", 0).latitude,
+                    "longitude": data.get("gps", 0).longitude
+                } if data.get("gps", False) else "null"
             }
             for node, data in G.nodes(data=True)
             ],
             "edges": [
             {
-                "source": u,
-                "target": v,
-                "lineId": data.get("line_id", ""),
-                "flow": data.get("flow", 0)
+                "source": data.get("source", "ERROR"),
+                "target": data.get("destination", "ERROR"),
+                "lineId": data.get("line_id", "ERROR"),
+                "flow": data.get("flow", 0),
+                "visited-source-To-target": data.get("visited_STT", 0),
+                "visited-target-To-source": data.get("visited_TTS", 0)
             }
             for u, v, data in G.edges(data=True)
             ]
