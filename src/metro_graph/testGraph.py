@@ -1,27 +1,22 @@
 import matplotlib.pyplot as plt
 import networkx as nx
-from accebilite import create_data_set, graphs_to_array
-from inverse_node_edge import inverse_node_edge
+from accebilite import create_data_set, graphs_to_array, save_dataset, load_data_set
+from inverse_node_edge import inverse_node_edge_mat2mat
 
 def test_dataset(dataset, G):
-    """
-    Teste le dataset en comparant les graphes générés avec le graphe initial.
-    Passe par la conversion matrice pour valider la correspondance.
-    """
-    # Conserver la liste ordonnée des nœuds
     nodelist = list(G.nodes())
-    matrice_init = nx.to_numpy_array(G, nodelist=nodelist, weight=None)
-    # Inverse_node_edge est censée convertir une matrice d'adjacence en graphe
-    G_init = inverse_node_edge(matrice_init)
-    G_init = nx.relabel_nodes(G_init, {i: nodelist[i] for i in range(len(nodelist))})
-    for idx, matrice in enumerate(dataset):  # Comparer les 2 premiers graphes avec le graphe initial
-        # Reconstruire le graphe à partir de la matrice avec le même ordre des nœuds
-        newG = inverse_node_edge(matrice)
+
+    for idx, matrice in enumerate(dataset):
+        print(f"Taille matrice dataset {idx + 1} :", matrice.shape)
+
+        # Reconstruction du graphe
+        newG = nx.from_numpy_array(matrice, create_using=nx.DiGraph)
         newG = nx.relabel_nodes(newG, {i: nodelist[i] for i in range(len(nodelist))})
 
-        print(f"\nComparaison du graphe {idx + 1} avec le graphe initial:")
-        
-        compare_graphs(G_init, newG, title=f"Graphe Initial vs Modifié {idx + 1}")
+        print(f"\nComparaison du graphe {idx + 1} avec le graphe initial :")
+        compare_graphs(G, newG, title=f"Graphe Initial vs Modifié {idx + 1}")
+
+
 
 def compare_graphs(graph1, graph2, title="Comparaison des Graphes"):
     """
@@ -52,6 +47,16 @@ def compare_graphs(graph1, graph2, title="Comparaison des Graphes"):
     plt.legend()
     plt.show()
 
+def test_save_load_dataset(dataset, nodelist):
+    # Conserver la liste ordonnée des nœuds
+    save_dataset(dataset, "test_save_load_dataser.pkl")
+    matrices = load_data_set("test_save_load_dataser.pkl")
+    # Reconstruire les graphes à partir des matrice
+    newG = nx.from_numpy_array(matrices[0], create_using=nx.DiGraph)
+    newG = nx.relabel_nodes(newG, {i: nodelist[i] for i in range(len(nodelist))})
+    print("\nComparaison du graphe initial avec le graphe récupéré :")
+    compare_graphs(G, newG, title="Graphe Initial vs Modifié")
+
 if __name__ == "__main__":
     graph = {}
     graph["0"] = {"1" : {"weight" : 1}}
@@ -63,9 +68,10 @@ if __name__ == "__main__":
 
     G = nx.from_dict_of_dicts(graph, create_using=nx.DiGraph)
     NUM_GRAPHS = 20
-    MAX_EDGES_TO_REMOVE = 3
+    MAX_EDGES_TO_REMOVE = 1
     nodelist = list(G.nodes())
     # # Générer le dataset de graphes connectés
     dataset = create_data_set(G, NUM_GRAPHS, MAX_EDGES_TO_REMOVE)
     dataset = graphs_to_array(dataset, G)
-    test_dataset(dataset, G)
+    #test_dataset(dataset, G)
+    test_save_load_dataset(dataset, nodelist)

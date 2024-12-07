@@ -3,6 +3,7 @@ import random
 import pickle
 from metroGraph_oriented import load_metro_graph, GpsCoordinate
 from pathlib import Path
+from inverse_node_edge import inverse_node_edge_mat2mat
 
 
 def is_connected_after_removal(graph, edges_to_remove):
@@ -56,7 +57,8 @@ def graphs_to_array(graph_list, nodelist):
     adjacency_matrix = []
     
     for graph in graph_list:
-        adjacency_matrix.append(nx.to_numpy_array(graph, nodelist=nodelist, weight=None))
+        adjacency_matrix_tmp = nx.to_numpy_array(graph, nodelist=nodelist, weight=None)
+        adjacency_matrix.append(adjacency_matrix_tmp)
     
     return adjacency_matrix
 
@@ -75,11 +77,13 @@ def load_data_set(filename = "connected_graphs_1000.pkl"):
     with open(save_path, "rb") as f:
         matrices = pickle.load(f)
     
+    return matrices
+
+def dataset_to_graph(dataset):
     # Reconstruire les graphes à partir des matrice
     graphs = []
-    for matrice in matrices:
-        # Convertir le graphe en matrice d'adjacence en utilisant l'ordre des n��uds
-        graphs.append(nx.convert_matrix.from_numpy_array(matrice))
+    for matrice in dataset:
+        graphs.append(nx.from_numpy_array(matrice, create_using=nx.DiGraph))
     return graphs
 
 def save_dataset(dataset, filename = "connected_graphs_1000.pkl"):
