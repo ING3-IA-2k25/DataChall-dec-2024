@@ -3,6 +3,7 @@ from math import sqrt
 from src.metro_graph.metroGraph  import load_metro_graph, GpsCoordinate, save_metro_graph
 from src.simulation.passenger_flow import PassengerFlowRepository, PassengerFlow, PassengerDataLoader
 from src.simulation.Astart import PathFinder, FlowProcessor, FlowUpdater
+from src.metro_graph.accebilite import load_data_set, save_dataset
 
 def test_simulation(iter: int):
     # Initialize components
@@ -41,34 +42,44 @@ def test_simulation(iter: int):
     
 def run_simulation():
       # Initialize components
-    graph = load_metro_graph()
-    flow_processor = FlowProcessor(graph)
-    
+    dataset = load_data_set("connected_graphs_10.pkl")
     data_loader = PassengerDataLoader()
     repository = PassengerFlowRepository(data_loader)
+    # graph = load_metro_graph()
     
-    flow_updater = FlowUpdater(graph)
-    
-    # initializations
     flows = repository.get_all_flows()
-    flow_updater.initialize_flow_counters()
+    dataset_output = []
     
-    # run A*
-    paths = flow_processor.process_flows(flows)
+    for graph in dataset:
+        flow_processor = FlowProcessor(graph)    
+        
+        flow_updater = FlowUpdater(graph)
+        
+        # initializations
+        # flow_updater.initialize_flow_counters()
+        
+        # run A*
+        paths = flow_processor.process_flows(flows)
+        
+        # update graph with flows
+        echec = 0
+        for (source, dest, count), path in paths.items():
+            if path:
+                flow_updater.update_flow(path, count)
+            else:
+                echec += 1
+        
+        dataset_output.append(graph)
+    # print(f"Nombre de flux échoués: {echec}")
+    # save_metro_graph(graph, "output_graph")
+    save_dataset(dataset_output, "output_graphs_1000.pkl")
     
-    # update graph with flows
-    echec = 0
-    for (source, dest, count), path in paths.items():
-        if path:
-            flow_updater.update_flow(path, count)
-        else:
-            echec += 1
-            
-    print(f"Nombre de flux échoués: {echec}")
-    save_metro_graph(graph, "output_graph")
             
     
 if __name__ == "__main__":
     # test_simulation(30000)
-    run_simulation()
+    # load_metro_graph()
+    
+    # run_simulation()
+    pass
     

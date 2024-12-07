@@ -10,28 +10,39 @@ class PathFinder:
     def __init__(self, graph: nx.Graph):
         self.graph = graph
 
+    def parse_gps(self, gps_str: str) -> Tuple[float, float]:
+        """Parse GPS string into latitude and longitude"""
+        try:
+            lat, lon = map(float, gps_str.split(','))
+            return lat, lon
+        except (ValueError, AttributeError):
+            return 0.0, 0.0
+
     def heuristic(self, node1: str, node2: str) -> float:
         """Calculate straight-line distance between stations using GPS coords"""
         n1_data = self.graph.nodes[node1]
         n2_data = self.graph.nodes[node2]
         
         if not (n1_data.get('gps') and n2_data.get('gps')):
-            return 0
+            return 0.0
             
-        lat1, lon1 = n1_data['gps'].latitude, n1_data['gps'].longitude
-        lat2, lon2 = n2_data['gps'].latitude, n2_data['gps'].longitude
-        
-        return sqrt((lat2 - lat1)**2 + (lon2 - lon1)**2)
+        # Parse GPS coordinates from string format
+        try:
+            lat1, lon1 = self.parse_gps(str(n1_data['gps']))
+            lat2, lon2 = self.parse_gps(str(n2_data['gps']))
+            
+            return sqrt((lat2 - lat1)**2 + (lon2 - lon1)**2)
+        except:
+            return 0.0
 
     def find_path(self, start: str, end: str) -> List[str]:
-        """Find shortest path using A*"""
+        """Find shortest path using A* algorithm"""
         return nx.astar_path(
-            self.graph, 
-            start, 
-            end, 
+            self.graph,
+            start,
+            end,
             heuristic=lambda n1, n2: self.heuristic(n1, n2)
         )
-
 class FlowProcessor:
     """Processes multiple person flows and finds optimal paths"""
     def __init__(self, graph: nx.Graph):
@@ -83,7 +94,7 @@ class FlowUpdater:
                 continue
             
             edge: Connection = self.graph.edges[source, destination]
-       
+            
             if source == edge['source']:
                 edge['visited_STT'] += counter
             else:
