@@ -72,9 +72,9 @@ test_mat.remove([])
 
 test_mat = np.array(test_mat)
 
+truc = nx.from_numpy_array(test_mat, create_using=nx.DiGraph)
 for i in range(1000):
-    truc = nx.from_numpy_array(test_mat, create_using=nx.DiGraph)
-
+    nx.to_numpy_array(truc)
 
 # test_mat = [[1, 1, 1, 1, 1],
 #             [0, 0, 0, 0, 0],
