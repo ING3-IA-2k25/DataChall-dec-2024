@@ -19,7 +19,8 @@ export default class ConnectionLineService implements IConnectionLineService {
       .filter(connection => {
         const source = stationMap.get(connection.source);
         const target = stationMap.get(connection.target);
-        return source?.gps && target?.gps;
+        console.log('source:', source);
+        return !(!source || !target || source!.gps === null || target!.gps=== null || isNaN(source!.gps.latitude) || isNaN(source!.gps.longitude) || isNaN(target!.gps.latitude) || isNaN(target!.gps.longitude));
       })
       .map(connection => {
         const source = stationMap.get(connection.source)!;

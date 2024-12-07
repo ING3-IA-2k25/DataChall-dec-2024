@@ -10,9 +10,12 @@ export default class StationMarkerService implements IStationMarkerService {
     this.removeStationMarkers();
 
     this.circles = stations
-      .filter(station =>
-        station.gps !== null
-      )
+      .filter(station => {
+        if (!station.gps === null) return false;
+        const lat = station.gps!.latitude
+        const lng = station.gps!.longitude
+        return station.gps !== null && !isNaN(lat) && !isNaN(lng)
+    })
       .map(station => {
         const circle = L.circle(
           [station.gps!.latitude, station.gps!.longitude],
