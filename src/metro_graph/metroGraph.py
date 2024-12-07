@@ -41,6 +41,8 @@ class Connection:
     """Connection between stations with line ID and flow"""
     line_id: str
     flow: int = 0
+    visited_STT: int = 0
+    visited_TTS: int = 0
 
 class DataLoader:
     """Responsible for loading and parsing CSV files"""
@@ -111,7 +113,9 @@ class MetroGraph:
                 row['de Station'],
                 row['vers Station'],
                 line_id=row['de Ligne'],
-                flow=0
+                flow=0,
+                visited_STT=0,
+                visited_TTS=0
             )
 
     def get_graph(self) -> nx.Graph:
