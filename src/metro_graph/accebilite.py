@@ -1,7 +1,7 @@
 import networkx as nx
 from itertools import combinations
 import random
-from metroGraph import load_metro_graph
+from src.metro_graph.metroGraph import load_metro_graph, GpsCoordinate, save_metro_graph
 import pickle
 from pathlib import Path
 
@@ -57,6 +57,7 @@ def load_data_set(filename = "connected_graphs_1000.pkl"):
     """
     # get number of connected graphs in filename "connected_graphs_{NUM_GRAPHS}.pkl"
     number = filename.split('_')[-1].split('.')[0]
+    print(f"Number of connected graphs in {filename} : {number}")
     save_dir = Path("./data")
     save_path = save_dir / filename
     
@@ -78,20 +79,28 @@ def save_dataset(dataset, filename = "connected_graphs_1000.pkl"):
 
 # Exemple d'utilisation
 if __name__ == "__main__":
-    # dataset = load_data_set("connected_graphs_1000.pkl")
+    dataset = load_data_set()
+    print(f"\nNombre total de graphes connectés chargés : {len(dataset)}")
     
-    G = load_metro_graph()
+    g = dataset[3]
+    
+    save_metro_graph(g, "graph_3")
+    
+    # first = dataset[0]
+    # print first edga data
+    # print(first.edges.data())    
+    # G = load_metro_graph()
 
-    # # Spécifier le nombre de graphes à générer et les arêtes max à supprimer
-    NUM_GRAPHS = 1000
-    MAX_EDGES_TO_REMOVE = 20
+    # # # Spécifier le nombre de graphes à générer et les arêtes max à supprimer
+    # NUM_GRAPHS = 10
+    # MAX_EDGES_TO_REMOVE = 20
 
-    # # Générer le dataset de graphes connectés
-    dataset = create_data_set(G, NUM_GRAPHS, MAX_EDGES_TO_REMOVE)
-    print(f"\nNombre total de graphes connectés générés : {len(dataset)}")
+    # # # Générer le dataset de graphes connectés
+    # dataset = create_data_set(G, NUM_GRAPHS, MAX_EDGES_TO_REMOVE)
+    # print(f"\nNombre total de graphes connectés générés : {len(dataset)}")
 
-    # # sauvegarder les graphes dans un fichier pickle
-    save_dataset(dataset, f"connected_graphs_{NUM_GRAPHS}.pkl")
-    # with open(f"connected_graphs_{NUM_GRAPHS}.pkl", "wb") as f:
-    #     pickle.dump(dataset, f)
+    # # # sauvegarder les graphes dans un fichier pickle
+    # save_dataset(dataset, f"connected_graphs_{NUM_GRAPHS}.pkl")
+    # # with open(f"connected_graphs_{NUM_GRAPHS}.pkl", "wb") as f:
+    # #     pickle.dump(dataset, f)
     
