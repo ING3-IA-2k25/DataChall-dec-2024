@@ -23,9 +23,9 @@ def convert_graph_to_json():
             ],
             "edges": [
             {
-                "source": u,
-                "target": v,
-                "lineId": data.get("line_id", ""),
+                "source": data.get("source", "ERROR"),
+                "target": data.get("destination", "ERROR"),
+                "lineId": data.get("line_id", "ERROR"),
                 "flow": data.get("flow", 0),
                 "visited-source-To-target": data.get("visited_STT", 0),
                 "visited-target-To-source": data.get("visited_TTS", 0)

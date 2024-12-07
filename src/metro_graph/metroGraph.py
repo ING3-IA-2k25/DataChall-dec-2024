@@ -41,9 +41,11 @@ class Connection:
     """Connection between stations with line ID and flow"""
     line_id: str
     flow: int = 0
+    source: str = ""
+    target: str = ""
     visited_STT: int = 0
     visited_TTS: int = 0
-
+    
 class DataLoader:
     """Responsible for loading and parsing CSV files"""
     def __init__(self, data_dir: str = "./data"):
@@ -112,6 +114,8 @@ class MetroGraph:
             self.graph.add_edge(
                 row['de Station'],
                 row['vers Station'],
+                source= row['de Station'],
+                destination =row['vers Station'],
                 line_id=row['de Ligne'],
                 flow=0,
                 visited_STT=0,
@@ -135,6 +139,10 @@ def load_metro_graph() -> nx.Graph:
     persistence = GraphPersistence()
     return persistence.load_graph()
 
+def save_metro_graph(G: nx.Graph) -> None:
+    """Saves the metro graph to disk"""
+    persistence = GraphPersistence()
+    persistence.save_graph(G)
 
 def main():
     # Initialize components
