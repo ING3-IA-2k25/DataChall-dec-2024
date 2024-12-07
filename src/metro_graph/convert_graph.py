@@ -3,7 +3,7 @@ import json
 import networkx as nx
 import sys
 
-from metroGraph import load_metro_graph, GpsCoordinate
+from src.metro_graph.metroGraph import load_metro_graph, GpsCoordinate
 
 def convert_graph_to_json():
     try:
