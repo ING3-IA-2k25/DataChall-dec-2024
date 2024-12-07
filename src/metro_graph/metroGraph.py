@@ -7,7 +7,7 @@ import numpy as np
 import pickle
 from pathlib import Path
 
-from src.metro_graph.GraphPersistence import GraphPersistence
+from GraphPersistence import GraphPersistence
 
 @dataclass
 class GpsCoordinate:

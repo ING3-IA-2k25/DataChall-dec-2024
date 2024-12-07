@@ -1,6 +1,7 @@
 import networkx as nx
 from itertools import combinations
 import random
+import matplotlib.pyplot as plt
 from metroGraph import load_metro_graph
 import pickle
 from pathlib import Path
@@ -76,6 +77,54 @@ def save_dataset(dataset, filename = "connected_graphs_1000.pkl"):
     with open(save_path, "wb") as f:
         pickle.dump(dataset, f)
 
+def test_dataset(dataset, G):
+    """
+    Teste le dataset en comparant les graphes générés avec le graphe initial.
+    Passe par la conversion matrice pour valider la correspondance.
+    """
+    # Conserver la liste ordonnée des nœuds
+    nodelist = list(G.nodes())
+
+    for idx, graph in enumerate(dataset[:2]):  # Comparer les 2 premiers graphes avec le graphe initial
+        # Convertir le graphe en matrice d'adjacence en utilisant l'ordre des nœuds
+        array = nx.convert_matrix.to_numpy_array(graph, nodelist=nodelist)
+
+        # Reconstruire le graphe à partir de la matrice avec le même ordre des nœuds
+        newG = nx.convert_matrix.from_numpy_array(array)
+        newG = nx.relabel_nodes(newG, {i: nodelist[i] for i in range(len(nodelist))})
+
+        print(f"\nComparaison du graphe {idx + 1} avec le graphe initial:")
+        compare_graphs(G, newG, title=f"Graphe Initial vs Modifié {idx + 1}")
+
+def compare_graphs(graph1, graph2, title="Comparaison des Graphes"):
+    """
+    Compare deux graphes et affiche les arêtes différentes en rouge.
+    
+    :param graph1: Premier graphe NetworkX (référence).
+    :param graph2: Deuxième graphe NetworkX (modifié).
+    :param title: Titre de la visualisation.
+    """
+    pos = nx.spring_layout(graph1)  # Positionnement des nœuds
+    
+    # Déterminer les différences d'arêtes
+    edges_graph1 = set(graph1.edges())
+    edges_graph2 = set(graph2.edges())
+
+    missing_edges = edges_graph1 - edges_graph2  # Arêtes supprimées
+
+    plt.figure(figsize=(10, 8))
+    # Dessiner le graphe initial en bleu clair
+    nx.draw(graph1, pos, with_labels=True, edge_color="lightblue", node_color="skyblue", node_size=700, font_size=12, font_weight="bold")
+    
+    # Dessiner les arêtes supprimées en rouge
+    if missing_edges:
+        nx.draw_networkx_edges(graph1, pos, edgelist=missing_edges, edge_color="red", width=2, style="dashed", label="Arêtes supprimées")
+    
+
+    plt.title(title)
+    plt.legend()
+    plt.show()
+
 # Exemple d'utilisation
 if __name__ == "__main__":
     # dataset = load_data_set("connected_graphs_1000.pkl")
@@ -94,4 +143,5 @@ if __name__ == "__main__":
     save_dataset(dataset, f"connected_graphs_{NUM_GRAPHS}.pkl")
     # with open(f"connected_graphs_{NUM_GRAPHS}.pkl", "wb") as f:
     #     pickle.dump(dataset, f)
+    
     
