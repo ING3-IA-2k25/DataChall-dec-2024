@@ -2,8 +2,8 @@ import networkx as nx
 from itertools import combinations
 import random
 import matplotlib.pyplot as plt
-from metroGraph import load_metro_graph
 import pickle
+from metroGraph_oriented import load_metro_graph, GpsCoordinate
 from pathlib import Path
 
 
@@ -17,7 +17,7 @@ def is_connected_after_removal(graph, edges_to_remove):
     """
     graph_copy = graph.copy()
     graph_copy.remove_edges_from(edges_to_remove)
-    return nx.is_connected(graph_copy)
+    return nx.is_strongly_connected(graph_copy)
 
 def create_data_set(graph, num_graphs, max_edges_to_remove=2):
     """
@@ -31,7 +31,7 @@ def create_data_set(graph, num_graphs, max_edges_to_remove=2):
     """
     all_edges = list(graph.edges())
     connected_graphs = set()
-
+    
     while len(connected_graphs) < num_graphs:
         # Choisir aléatoirement le nombre d'arêtes à supprimer (1 à max_edges_to_remove)
         num_edges_to_remove = random.randint(1, max_edges_to_remove)
@@ -49,6 +49,20 @@ def create_data_set(graph, num_graphs, max_edges_to_remove=2):
     return [graph for _, graph in connected_graphs]
     # return [(graph_copy, list(edges)) for edges, graph_copy in connected_graphs]
 
+def graphs_to_array(graph_list, nodelist):
+    """
+    Converte une liste de graphes NetworkX en une matrice d'adjacence.
+    
+    :param graph_list: La liste de graphes NetworkX.
+    :return: Une matrice d'adjacence.
+    """
+    adjacency_matrix = []
+    
+    for graph in graph_list:
+        adjacency_matrix.append(nx.to_numpy_array(graph, nodelist=nodelist, weight=None))
+    
+    return adjacency_matrix
+
 def load_data_set(filename = "connected_graphs_1000.pkl"):
     """
     Charge un dataset de graphes connectés à partir d'un fichier pickle.
@@ -62,7 +76,14 @@ def load_data_set(filename = "connected_graphs_1000.pkl"):
     save_path = save_dir / filename
     
     with open(save_path, "rb") as f:
-        return pickle.load(f)
+        matrices = pickle.load(f)
+    
+    # Reconstruire les graphes à partir des matrice
+    graphs = []
+    for matrice in matrices:
+        # Convertir le graphe en matrice d'adjacence en utilisant l'ordre des n��uds
+        graphs.append(nx.convert_matrix.from_numpy_array(matrice))
+    return graphs
 
 def save_dataset(dataset, filename = "connected_graphs_1000.pkl"):
     """
@@ -85,12 +106,9 @@ def test_dataset(dataset, G):
     # Conserver la liste ordonnée des nœuds
     nodelist = list(G.nodes())
 
-    for idx, graph in enumerate(dataset[:2]):  # Comparer les 2 premiers graphes avec le graphe initial
-        # Convertir le graphe en matrice d'adjacence en utilisant l'ordre des nœuds
-        array = nx.convert_matrix.to_numpy_array(graph, nodelist=nodelist)
-
+    for idx, matrice in enumerate(dataset[:2]):  # Comparer les 2 premiers graphes avec le graphe initial
         # Reconstruire le graphe à partir de la matrice avec le même ordre des nœuds
-        newG = nx.convert_matrix.from_numpy_array(array)
+        newG = nx.from_numpy_array(matrice, create_using=nx.DiGraph)
         newG = nx.relabel_nodes(newG, {i: nodelist[i] for i in range(len(nodelist))})
 
         print(f"\nComparaison du graphe {idx + 1} avec le graphe initial:")
@@ -132,15 +150,17 @@ if __name__ == "__main__":
     G = load_metro_graph()
 
     # # Spécifier le nombre de graphes à générer et les arêtes max à supprimer
-    NUM_GRAPHS = 1000
-    MAX_EDGES_TO_REMOVE = 20
-
+    NUM_GRAPHS = 1
+    MAX_EDGES_TO_REMOVE = 1
+    nodelist = list(G.nodes())
     # # Générer le dataset de graphes connectés
     dataset = create_data_set(G, NUM_GRAPHS, MAX_EDGES_TO_REMOVE)
-    print(f"\nNombre total de graphes connectés générés : {len(dataset)}")
+    dataset = graphs_to_array(dataset, G)
 
+    print(f"\nNombre total de graphes connectés générés : {len(dataset)}")
+    test_dataset(dataset, G)
     # # sauvegarder les graphes dans un fichier pickle
-    save_dataset(dataset, f"connected_graphs_{NUM_GRAPHS}.pkl")
+    #save_dataset(dataset, f"connected_graphs_{NUM_GRAPHS}.pkl")
     # with open(f"connected_graphs_{NUM_GRAPHS}.pkl", "wb") as f:
     #     pickle.dump(dataset, f)
     
