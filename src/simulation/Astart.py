@@ -2,14 +2,8 @@ from dataclasses import dataclass
 from typing import List, Dict, Tuple
 import networkx as nx
 from math import sqrt
-from src.metro_graph.metroGraph  import MetroGraph, DataLoader, StationRepository, load_metro_graph, GpsCoordinate
-
-@dataclass
-class PersonFlow:
-    """Represents a flow of people between stations"""
-    from_station: str
-    to_station: str
-    num_people: int
+from src.metro_graph.metroGraph  import MetroGraph, DataLoader, StationRepository, load_metro_graph, GpsCoordinate, save_metro_graph
+from src.simulation.passenger_flow import PassengerFlow
 
 class PathFinder:
     """Handles path finding using A* algorithm"""
@@ -44,30 +38,65 @@ class FlowProcessor:
         self.path_finder = PathFinder(graph)
         self.graph = graph
 
-    def process_flows(self, flows: List[PersonFlow]) -> Dict[Tuple[str, str], List[str]]:
+    def process_flows(self, flows: List[PassengerFlow]) -> Dict[Tuple[str, str, int], List[str]]:
         """Process all flows and return paths"""
         paths = {}
         for flow in flows:
-            path_key = (flow.from_station, flow.to_station)
+            path_key = (flow.source, flow.destination, flow.count)
             if path_key not in paths:
                 try:
                     paths[path_key] = self.path_finder.find_path(
-                        flow.from_station, 
-                        flow.to_station
+                        flow.source, 
+                        flow.destination
                     )
                 except nx.NetworkXNoPath:
-                    print(f"No path found between {flow.from_station} and {flow.to_station}")
+                    print(f"No path found between {flow.source} and {flow.destination}")
                     paths[path_key] = []
         return paths
 
+class FlowUpdater:
+    """Updates graph edges with passenger flow data"""
+    def __init__(self, graph: nx.Graph):
+        self.graph = graph
+
+    def initialize_flow_counters(self) -> None:
+        """Initialize flow counters for all edges"""
+        self.graph.edges.map(lambda u, v: self.graph[u][v].update({
+            'source_to_dest': 0,
+            'dest_to_source': 0
+        }))
+        
+        
+        
+    def update_flow(self, path: List[str], count: int) -> None:
+        """Update flow counters for a specific path"""
+        print('\n\n\n')
+        print(path)
+        for i in range(len(path) - 1):
+            source = path[i]
+            destination = path[i + 1]
+            
+            # get nodes
+            if not self.graph.has_edge(source, destination):
+                continue
+            
+            edge = self.graph.edges[source, destination]
+            
+            if source == edge['source']:
+                edge['visited_STT'] += count
+            else:
+                edge['visited_TTS'] += count
+            
+            
+    
 def main():
     # Example usage
     graph = load_metro_graph()
     
     # Sample flows
     flows = [
-        PersonFlow("Châtelet", "Nation", 100),
-        PersonFlow("La Défense", "Gare de Lyon", 50),
+        PassengerFlow("Châtelet", "Nation", 100),
+        PassengerFlow("La Défense", "Gare de Lyon", 50),
         # Add more flows as needed
     ]
     
@@ -75,11 +104,18 @@ def main():
     processor = FlowProcessor(graph)
     paths = processor.process_flows(flows)
     
-    # Print results
-    for (start, end), path in paths.items():
+    flow_updater = FlowUpdater(graph)
+    
+    for (start, end, count), path in paths.items():
         if path:
-            print(f"\nPath from {start} to {end}:")
+            print(f"\nPath from {start} to {end}: {count} passengers")
             print(" -> ".join(path))
+            flow_updater.update_flow(path, count)
+            # update_graph_with_flows(graph, paths, count)
+    
+    # Save updated graph
+    save_metro_graph(graph)        
+    
 
 if __name__ == "__main__":
     main()
