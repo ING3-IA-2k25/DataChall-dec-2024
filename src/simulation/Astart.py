@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import List, Dict, Tuple
 import networkx as nx
 from math import sqrt
-from src.metro_graph.metroGraph  import MetroGraph, DataLoader, StationRepository, load_metro_graph, GpsCoordinate, save_metro_graph
+from src.metro_graph.metroGraph  import MetroGraph, DataLoader, StationRepository, load_metro_graph, GpsCoordinate, save_metro_graph, Connection
 from src.simulation.passenger_flow import PassengerFlow
 
 class PathFinder:
@@ -59,19 +59,21 @@ class FlowUpdater:
     def __init__(self, graph: nx.Graph):
         self.graph = graph
 
+    # todo: repaire this function (Map is not defined)
     def initialize_flow_counters(self) -> None:
         """Initialize flow counters for all edges"""
-        self.graph.edges.map(lambda u, v: self.graph[u][v].update({
-            'source_to_dest': 0,
-            'dest_to_source': 0
-        }))
+        # self.graph.edges.items().map(lambda u, v: self.graph[u][v].update({
+        #     'source_to_dest': 0,
+        #     'dest_to_source': 0
+        # }))
+        pass
         
         
         
-    def update_flow(self, path: List[str], count: int) -> None:
+    def update_flow(self, path: List[str], counter: int) -> None:
         """Update flow counters for a specific path"""
-        print('\n\n\n')
-        print(path)
+        # print('\n\n\n')
+        # print(path)
         for i in range(len(path) - 1):
             source = path[i]
             destination = path[i + 1]
@@ -80,12 +82,12 @@ class FlowUpdater:
             if not self.graph.has_edge(source, destination):
                 continue
             
-            edge = self.graph.edges[source, destination]
-            
+            edge: Connection = self.graph.edges[source, destination]
+       
             if source == edge['source']:
-                edge['visited_STT'] += count
+                edge['visited_STT'] += counter
             else:
-                edge['visited_TTS'] += count
+                edge['visited_TTS'] +=  counter
             
             
     
