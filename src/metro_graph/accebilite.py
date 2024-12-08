@@ -47,6 +47,64 @@ def create_data_set(graph, num_graphs, max_edges_to_remove=2):
     return [graph for _, graph in connected_graphs]
     # return [(graph_copy, list(edges)) for edges, graph_copy in connected_graphs]
 
+def create_data_set_part(graph, num_graphs, max_edges_to_remove=2):
+    """
+    Crée un dataset contenant un nombre spécifique de graphes connectés
+    après suppression aléatoire d'arêtes.
+    
+    :param graph: Le graphe NetworkX initial.
+    :param num_graphs: Nombre de graphes à générer.
+    :param max_edges_to_remove: Nombre maximum d'arêtes à supprimer par graphe.
+    :return: Une liste de tuples (graphe connecté, arêtes supprimées).
+    """
+    nodelist = list(graph.nodes())
+    all_edges = list(graph.edges())
+    count = 0
+    while count < num_graphs:
+        # Choisir aléatoirement le nombre d'arêtes à supprimer (1 à max_edges_to_remove)
+        num_edges_to_remove = random.randint(1, max_edges_to_remove)
+        edges_to_remove = random.sample(all_edges, num_edges_to_remove)
+        
+        # Vérifier si le graphe reste connecté après suppression
+        if is_connected_after_removal(graph, edges_to_remove):
+            count += 1
+            graph_copy = graph.copy()
+            graph_copy.remove_edges_from(edges_to_remove)
+            # Utiliser un ensemble pour éviter les doublons
+            graph_copy = graphs_to_array_part(graph_copy, nodelist)
+            save_dataset_part(graph_copy, f"connected_graphs_{num_graphs}.pkl")
+            if count % 1000 == 0:
+                print(count)
+
+def create_data_set_part_tmp(graph, num_graphs, name, max_edges_to_remove=2):
+    """
+    Crée un dataset contenant un nombre spécifique de graphes connectés
+    après suppression aléatoire d'arêtes.
+    
+    :param graph: Le graphe NetworkX initial.
+    :param num_graphs: Nombre de graphes à générer.
+    :param max_edges_to_remove: Nombre maximum d'arêtes à supprimer par graphe.
+    :return: Une liste de tuples (graphe connecté, arêtes supprimées).
+    """
+    nodelist = list(graph.nodes())
+    all_edges = list(graph.edges())
+    count = 0
+    while count < num_graphs:
+        # Choisir aléatoirement le nombre d'arêtes à supprimer (1 à max_edges_to_remove)
+        num_edges_to_remove = random.randint(1, max_edges_to_remove)
+        edges_to_remove = random.sample(all_edges, num_edges_to_remove)
+        
+        # Vérifier si le graphe reste connecté après suppression
+        if is_connected_after_removal(graph, edges_to_remove):
+            count += 1
+            graph_copy = graph.copy()
+            graph_copy.remove_edges_from(edges_to_remove)
+            # Utiliser un ensemble pour éviter les doublons
+            graph_copy = graphs_to_array_part(graph_copy, nodelist)
+            save_dataset_part(graph_copy, f"connected_graphs_{name}.pkl")
+            if count % 1000 == 0:
+                print(count)
+
 def graphs_to_array(graph_list, nodelist):
     """
     Converte une liste de graphes NetworkX en une matrice d'adjacence.
@@ -60,6 +118,19 @@ def graphs_to_array(graph_list, nodelist):
         adjacency_matrix_tmp = nx.to_numpy_array(graph, nodelist=nodelist, weight=None)
         adjacency_matrix_tmp = compressMat(adjacency_matrix_tmp)
         adjacency_matrix.append(adjacency_matrix_tmp)
+    
+    return adjacency_matrix
+
+def graphs_to_array_part(graph, nodelist):
+    """
+    Converte une liste de graphes NetworkX en une matrice d'adjacence.
+    
+    :param graph_list: La liste de graphes NetworkX.
+    :return: Une matrice d'adjacence.
+    """
+    
+    adjacency_matrix = nx.to_numpy_array(graph, nodelist=nodelist, weight=None)
+    adjacency_matrix = compressMat(adjacency_matrix)
     
     return adjacency_matrix
 
@@ -100,6 +171,35 @@ def save_dataset(dataset, filename = "connected_graphs_1000.pkl"):
     with open(save_path, "wb") as f:
         pickle.dump(dataset, f)
 
+def save_dataset_part(dataset_element, filename="connected_graphs_1000.pkl"):
+    """
+    Sauvegarde un dataset de graphes connectés dans un fichier pickle, en écrivant
+    chaque graphe un par un dans le fichier (au lieu de tout sérialiser en une seule fois).
+
+    :param dataset: Le dataset de graphes connectés (itérable).
+    :param filename: Le nom du fichier pickle.
+    """
+    save_dir = Path("./data")
+    save_dir.mkdir(parents=True, exist_ok=True)
+    save_path = save_dir / filename
+
+    # Ouvrir en écriture binaire
+    with open(save_path, "ab") as f:
+        pickle.dump(dataset_element, f)
+        f.flush()   # Optionnel, pour s'assurer que les données sont bien écrites au fur et à mesure
+
+def load_dataset_part(filename="connected_graphs_1000.pkl"):
+    data = []
+    save_path = Path("./data") / filename
+    with open(save_path, "rb") as f:
+        while True:
+            try:
+                obj = pickle.load(f)
+                data.append(obj)
+            except EOFError:
+                break
+    return data
+
 # Exemple d'utilisation
 if __name__ == "__main__":
     # dataset = load_data_set("connected_graphs_1000.pkl")
@@ -107,14 +207,14 @@ if __name__ == "__main__":
     G = load_metro_graph()
 
     # # Spécifier le nombre de graphes à générer et les arêtes max à supprimer
-    NUM_GRAPHS = 1
-    MAX_EDGES_TO_REMOVE = 1
+    NUM_GRAPHS = 10
+    MAX_EDGES_TO_REMOVE = 30
     nodelist = list(G.nodes())
     # # Générer le dataset de graphes connectés
-    dataset = create_data_set(G, NUM_GRAPHS, MAX_EDGES_TO_REMOVE)
-    dataset = graphs_to_array(dataset, G)
+    dataset = create_data_set_part(G, NUM_GRAPHS, MAX_EDGES_TO_REMOVE)
+    #dataset = graphs_to_array(dataset, G)
 
-    print(f"\nNombre total de graphes connectés générés : {len(dataset)}")
+    #print(f"\nNombre total de graphes connectés générés : {len(dataset)}")
     # # sauvegarder les graphes dans un fichier pickle
     #save_dataset(dataset, f"connected_graphs_{NUM_GRAPHS}.pkl")
     # with open(f"connected_graphs_{NUM_GRAPHS}.pkl", "wb") as f:
