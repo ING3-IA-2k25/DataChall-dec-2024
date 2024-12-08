@@ -4,6 +4,7 @@ import networkx as nx
 from math import sqrt
 from src.metro_graph.metroGraph  import MetroGraph, DataLoader, StationRepository, load_metro_graph, GpsCoordinate, save_metro_graph, Connection
 from src.simulation.passenger_flow import PassengerFlow
+from concurrent.futures import ThreadPoolExecutor
 
 class PathFinder:
     """Handles path finding using A* algorithm"""
@@ -64,6 +65,20 @@ class FlowProcessor:
                     print(f"No path found between {flow.source} and {flow.destination}")
                     paths[path_key] = []
         return paths
+    
+    def process_flows_parallel(self, flows: List[PassengerFlow]) -> Dict[Tuple[str, str, int], List[str]]:
+        """Process all flows and return paths"""
+        paths = {}
+        with ThreadPoolExecutor() as executor:
+            for flow in flows:
+                path_key = (flow.source, flow.destination, flow.count)
+                if path_key not in paths:
+                    paths[path_key] = executor.submit(
+                        self.path_finder.find_path,
+                        flow.source, 
+                        flow.destination
+                    )
+        return {key: value.result() for key, value in paths.items()}
 
 class FlowUpdater:
     """Updates graph edges with passenger flow data"""
