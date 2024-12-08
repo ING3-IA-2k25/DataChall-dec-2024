@@ -3,7 +3,7 @@ import random
 import pickle
 from metroGraph_oriented import load_metro_graph, GpsCoordinate
 from pathlib import Path
-from inverse_node_edge import inverse_node_edge_mat2mat
+from binary import compressMat
 
 
 def is_connected_after_removal(graph, edges_to_remove):
@@ -58,6 +58,7 @@ def graphs_to_array(graph_list, nodelist):
     
     for graph in graph_list:
         adjacency_matrix_tmp = nx.to_numpy_array(graph, nodelist=nodelist, weight=None)
+        adjacency_matrix_tmp = compressMat(adjacency_matrix_tmp)
         adjacency_matrix.append(adjacency_matrix_tmp)
     
     return adjacency_matrix

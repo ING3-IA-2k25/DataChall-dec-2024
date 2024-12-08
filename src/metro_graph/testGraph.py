@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 from accebilite import create_data_set, graphs_to_array, save_dataset, load_data_set
 from inverse_node_edge import inverse_node_edge_mat2mat
+from binary import decompressMat
 
 def test_dataset(dataset, G):
     nodelist = list(G.nodes())
@@ -50,9 +51,10 @@ def compare_graphs(graph1, graph2, title="Comparaison des Graphes"):
 def test_save_load_dataset(dataset, nodelist):
     # Conserver la liste ordonnée des nœuds
     save_dataset(dataset, "test_save_load_dataser.pkl")
-    matrices = load_data_set("test_save_load_dataser.pkl")
+    matrices_compressed = load_data_set("test_save_load_dataser.pkl")
+    matrice = decompressMat(matrices_compressed[0])
     # Reconstruire les graphes à partir des matrice
-    newG = nx.from_numpy_array(matrices[0], create_using=nx.DiGraph)
+    newG = nx.from_numpy_array(matrice, create_using=nx.DiGraph)
     newG = nx.relabel_nodes(newG, {i: nodelist[i] for i in range(len(nodelist))})
     print("\nComparaison du graphe initial avec le graphe récupéré :")
     compare_graphs(G, newG, title="Graphe Initial vs Modifié")
